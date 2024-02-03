@@ -3,9 +3,11 @@ import tvm
 from tvm.script import tir as T
 from tvm.dlight.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from tvm.dlight.base.roller.arch import CUDA
+from tvm.dlight.gpu.matmul_analysis import get_tensorized_func_and_tags
 from tvm.dlight.gpu import Matmul
-from tvm.dlight.base.utils import apply_and_build, apply_and_build_parallel
+from tvm.dlight.base.utils import apply_and_build
 import time
+
 
 @tvm.register_func
 def tvm_callback_cuda_postproc(code, _):
@@ -25,27 +27,6 @@ def tvm_callback_cuda_postproc(code, _):
   """,
     )
     return code
-
-def matmul_nt(M, N, K, in_dtype="float16", out_dtype="float16"):
-    @tvm.script.ir_module
-    class MatmulNT:
-        @T.prim_func
-        def main(a: T.handle, b: T.handle, c: T.handle):
-            T.func_attr({"global_symbol": "main", "tir.noalias": True})
-            A = T.match_buffer(a, [M, K], dtype=in_dtype)
-            B = T.match_buffer(b, [N, K], dtype=in_dtype)
-            C = T.match_buffer(c, [M, N], dtype=out_dtype)
-
-            for i, j, k in T.grid(M, N, K):
-                with T.block("B"):
-                    vi, vj, vk = T.axis.remap("SSR", [i, j, k])
-                    with T.init():
-                        C[vi, vj] = 0.0
-                    C[vi, vj] = C[vi, vj] + A[vi, vk].astype(out_dtype) * B[vj, vk].astype(
-                        out_dtype
-                    )
-
-    return MatmulNT
 
 
 def matmul_nt_propagate_b(M, N, K, in_dtype="float16", out_dtype="float16"):
@@ -105,39 +86,43 @@ def matmul_nt_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16"):
     return MyModule
 
 benchmark_sets = [
-    # (prim_func, input_args, fast_dlight_schedule, default_dlight_schedule),
-    (matmul_nt, (1024, 1024, 1024, "float16", "float16"), Matmul, Matmul),
-    (matmul_nt, (8192, 8192, 8192, "float16", "float16"), Matmul, Matmul),
-    (matmul_nt, (16384, 16384, 16384, "float16", "float16"), Matmul, Matmul),
-    
+    # (prim_func, input_args, default_dlight_schedule),
+    (matmul_nt_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul)
 ]
 benchmark_results = {}
-for get_prim_func, input_args, f_schedule, d_schedule in benchmark_sets:
+for get_prim_func, input_args, d_schedule in benchmark_sets:
     ir_module = get_prim_func(*input_args)
     func = ir_module["main"]
     target = tvm.target.Target("nvidia/nvidia-a100")
     arch = CUDA(target)
-    policy = TensorCorePolicy(
-        func=func,
-        arch=arch,
-        tags={
-            "tensorcore_config": [0, 1],
-            "pipeline_stage": 2,
-            "use_async_copy": 1,
-        },
-    )
-    configs = policy.emit_config(1)
+    policy = DefaultPolicy(func=func, arch=arch)
+    try:
+        tensorized_func, tags = get_tensorized_func_and_tags(func, arch.target)
+    except:
+        tags = None
+    if tags:
+        policy = TensorCorePolicy(func=tensorized_func, arch=arch, tags=tags)
+
+    configs = policy.emit_config(20)
     for config in configs:
         print(config)
-    rule = f_schedule()
 
     tune_start = time.time()
-    cpresults, best = apply_and_build(func, configs, arch, parallel_build=False)
-    print(best.sch.mod)
-    print(best.code)
+    cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)
+    # print(best.code)
+    # print(best.sch.mod)
     fast_tune_time = time.time() - tune_start
-    print("[FastDlight] The best latency of top 1 is {:.3f} ms".format(cpresults[0].latency * 1e3))
-    print("[FastDlight] The best latency of top 20 is {:.3f} ms".format(best.latency * 1e3))
+    print(
+        "[FastDlight] The best latency of top 1 is {:.3f} ms".format(
+            cpresults[0].latency * 1e3
+        )
+    )
+    print(
+        "[FastDlight] The best latency of top 20 is {:.3f} ms".format(
+            best.latency * 1e3
+        )
+    )
 
     # evaluate the performance of the default schedule
 
@@ -158,7 +143,9 @@ for get_prim_func, input_args, f_schedule, d_schedule in benchmark_sets:
             )
         )
 
-    timer_cuda_mod = mod_default.time_evaluator(mod_default.entry_name, arch.device, number=5)
+    timer_cuda_mod = mod_default.time_evaluator(
+        mod_default.entry_name, arch.device, number=5
+    )
     t = timer_cuda_mod(*profile_tensors).mean
 
     print("Time cost of Dlight default schedule: {:.3f} ms".format(t * 1e3))
@@ -185,7 +172,8 @@ headers = [
 ]
 
 col_width = (
-    max(len(word) for row in [headers] + list(profile_config.values()) for word in row) + 2
+    max(len(word) for row in [headers] + list(profile_config.values()) for word in row)
+    + 2
 )  # padding
 
 print("".join(word.ljust(col_width) for word in headers))

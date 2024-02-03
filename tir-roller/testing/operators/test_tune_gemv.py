@@ -40,7 +40,7 @@ def gemv_i4(M, N, K, dtype="float16"):
         lambda i, j: te.sum(A[i, k] * B_decode[j, k], axis=k),
         name='C'
     )
-    func = te.create_prim_func([A, B, C]).with_attr("inconsistent", {
+    func = te.create_prim_func([A, B, C]).with_attr("dequantize_info", {
         'B': {
             'decode_block': 'B_decode',
             'fast_decoding': True,
@@ -79,20 +79,19 @@ def gemv(
 
 benchmark_sets = [
     # (prim_func, input_args, fast_dlight_schedule, default_dlight_schedule),
-    # (gemv, (1, 1024, 1024, "float16"), GEMV, GEMV),
-    # (gemv, (1, 8192, 8192, "float16"), GEMV, GEMV),
-    (gemv, (1, 16384, 16384, "float16"), GEMV, GEMV),
-    # (gemv_i4, (1, 14336, 57344, "float16"), GEMV, GEMV),
+    # (gemv, (1, 1024, 1024, "float16"), GEMV),
+    # (gemv, (1, 8192, 8192, "float16"), GEMV),
+    (gemv, (1, 16384, 16384, "float16"), GEMV),
+    (gemv_i4, (1, 16384, 16384, "float16"), GEMV),
 ]
 benchmark_results = {}
-for get_prim_func, input_args, f_schedule, d_schedule in benchmark_sets:
+for get_prim_func, input_args, d_schedule in benchmark_sets:
     ir_module = get_prim_func(*input_args)
     func = ir_module["main"]
     target = tvm.target.Target("nvidia/nvidia-a100")
     arch = CUDA(target)
     policy = DefaultPolicy(func=func, arch=arch)
     configs = policy.emit_config(20)
-    rule = f_schedule()
     
     tune_start = time.time()
     cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)

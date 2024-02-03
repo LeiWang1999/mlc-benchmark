@@ -3,69 +3,55 @@ import tvm
 from tvm.script import tir as T
 from tvm.dlight.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from tvm.dlight.base.roller.arch import CUDA
-from tvm.dlight.gpu.matmul_analysis import get_tensorized_func_and_tags
 from tvm.dlight.gpu import Matmul
-from tvm.dlight.base.utils import apply_and_build
+from tvm.dlight.gpu.matmul_analysis import get_tensorized_func_and_tags
+from tvm.dlight.base.utils import apply_and_build, apply_and_build_parallel
 import time
-from tvm import te, tir
 
 
-def conv2d_nhwc_hwio(n, f, h, w, c, kh, kw, s, d, p, in_dtype="float16", out_dtype="float16"):
-    A = te.placeholder((n, h, w, c), name="input", dtype=in_dtype)
-    B = te.placeholder((kh, kw, c, f), name="weight", dtype=in_dtype)
+def matmul_nt(N, K, in_dtype="float16", out_dtype="float16"):
+    @tvm.script.ir_module
+    class MatmulNT:
+        @T.prim_func
+        def main(a: T.handle, b: T.handle, c: T.handle):
+            m = T.int32()
+            T.func_attr({"global_symbol": "main", "tir.noalias": True})
+            A = T.match_buffer(a, [m, K], dtype=in_dtype)
+            B = T.match_buffer(b, [N, K], dtype=in_dtype)
+            C = T.match_buffer(c, [m, N], dtype=out_dtype)
 
-    pad_shape = (n, h + 2 * p, w + 2 * p, c)
-    pad_value = tir.const(0.0, A.dtype)
-    pad = te.compute(
-        pad_shape,
-        lambda n, h, w, c: te.if_then_else(
-            tir.all(
-                h >= p,
-                w >= p,
-                h < pad_shape[1] - p,
-                w < pad_shape[2] - p,
-            ),
-            A[n, h - p, w - p, c],
-            pad_value,
-        ),
-        name="pad",
-    )
-    kernel_h, kernel_w = kh, kw
-    stride_h, stride_w = s, s
-    dilation_h, dilation_w = d, d
-    out_h = (h + 2 * p - (dilation_h * (kernel_h - 1) + 1)) // stride_h + 1
-    out_w = (w + 2 * p - (dilation_w * (kernel_w - 1) + 1)) // stride_w + 1
-    out_shape = (n, out_h, out_w, f)
-    kh = te.reduce_axis((0, kernel_h), name="kh")
-    kw = te.reduce_axis((0, kernel_w), name="kw")
-    c = te.reduce_axis((0, c), name="c")
-    C = te.compute(
-        out_shape,
-        lambda n, h, w, f: te.sum(
-            pad[
-                n,
-                h * stride_h + kh * dilation_h,
-                w * stride_w + kw * dilation_w,
-                c,
-            ]
-            * B[kh, kw, c, f],
-            axis=[kh, kw, c],
-        ),
-        name="C",
-    )
-    return tvm.ir.IRModule({"main": te.create_prim_func([A, B, C])})
+            for i, j, k in T.grid(m, N, K):
+                with T.block("B"):
+                    vi, vj, vk = T.axis.remap("SSR", [i, j, k])
+                    with T.init():
+                        C[vi, vj] = tvm.tir.const(0, out_dtype)
+                    C[vi, vj] = C[vi, vj] + A[vi, vk].astype(out_dtype) * B[vj, vk].astype(
+                        out_dtype
+                    )
+
+    return MatmulNT
 
 
 benchmark_sets = [
-    # (prim_func, input_args, default_dlight_schedule),
-    (conv2d_nhwc_hwio, (128, 64, 224, 224, 3, 7, 7, 2, 1, 3, "float16", "float16"), Matmul),
-    (conv2d_nhwc_hwio, (128, 64, 224, 224, 64, 1, 1, 2, 1, 3, "float16", "float16"), Matmul),
-    (conv2d_nhwc_hwio, (128, 64, 224, 224, 3, 7, 7, 2, 1, 3, "float32", "float32"), Matmul),
+    # (prim_func, input_args, fast_dlight_schedule, default_dlight_schedule),
+    # (matmul_nt, (1024, 1024, "float16", "float16"), Matmul, Matmul),
+    (matmul_nt, (1024, 1024, "float32", "float32"), Matmul, Matmul),
+    # (matmul_nt, (16384, 16384, "float16", "float16"), Matmul, Matmul),
 ]
+
+def var_warpper(v, opt_shapes):
+    if isinstance(v, tvm.tir.Var):
+        assert v.name in opt_shapes
+        return opt_shapes[v.name]
+    elif isinstance(v, tvm.tir.IntImm):
+        return v.value
+    else:
+        raise RuntimeError("Not supported type: ", type(v))
+    
 benchmark_results = {}
-for get_prim_func, input_args, d_schedule in benchmark_sets:
+for get_prim_func, input_args, f_schedule, d_schedule in benchmark_sets:
     ir_module = get_prim_func(*input_args)
-    func = ir_module["main"]
+    func = ir_module["main"].with_attr({"opt_shapes": {'m': 1024}})
     target = tvm.target.Target("nvidia/nvidia-a100")
     arch = CUDA(target)
     policy = DefaultPolicy(func=func, arch=arch)
@@ -77,9 +63,14 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
         policy = TensorCorePolicy(func=func, arch=arch, tags=tags)
 
     configs = policy.emit_config(20)
+    for config in configs:
+        print(config)
+    rule = f_schedule()
 
     tune_start = time.time()
-    cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)
+    cpresults, best = apply_and_build(func, configs, arch, parallel_build=False)
+    print(best.sch.mod)
+    # print(best.code)
     fast_tune_time = time.time() - tune_start
     print("[FastDlight] The best latency of top 1 is {:.3f} ms".format(cpresults[0].latency * 1e3))
     print("[FastDlight] The best latency of top 20 is {:.3f} ms".format(best.latency * 1e3))
@@ -98,7 +89,9 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     for arg in args:
         profile_tensors.append(
             tvm.nd.array(
-                np.random.uniform(0, 1, [int(i) for i in arg.shape]).astype(arg.dtype),
+                np.random.uniform(0, 1, [var_warpper(i, { # for dynamic symbolic
+                'm': 1024
+            }) for i in arg.shape]).astype(arg.dtype),
                 device=arch.device,
             )
         )

@@ -6,7 +6,7 @@ from tvm.dlight.base.roller.arch import CUDA
 from tvm.dlight.gpu import Matmul
 from tvm.dlight.base.utils import apply_and_build, apply_and_build_parallel
 import time
-from tvm.dlight.base.analysis import get_tensorized_func_and_tags
+from tvm.dlight.gpu.matmul_analysis import get_tensorized_func_and_tags
 
 
 @T.prim_func(private=True)

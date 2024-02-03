@@ -6,7 +6,7 @@ from tvm.dlight.base.roller.arch import CUDA
 from tvm.dlight.gpu import Matmul
 from tvm.dlight.base.utils import apply_and_build, apply_and_build_parallel
 import time
-from tvm.dlight.base.analysis import get_tensorized_func_and_tags
+from tvm.dlight.gpu.matmul_analysis import get_tensorized_func_and_tags
 
 @T.prim_func(private=True)
 def fused_max_pool2d_multiply_add2_relu1(lv3: T.Buffer((T.int64(128), T.int64(112), T.int64(112), T.int64(64)), "float16"), param_0: T.Buffer((T.int64(1), T.int64(1), T.int64(1), T.int64(64)), "float16"), param_1: T.Buffer((T.int64(1), T.int64(1), T.int64(1), T.int64(64)), "float16"), T_relu_intermediate: T.Buffer((T.int64(128), T.int64(56), T.int64(56), T.int64(64)), "float16")):

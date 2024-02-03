@@ -124,7 +124,7 @@ layout = "NHWC"
 # Path to cross compiler
 target = tvm.target.Target("nvidia/nvidia-a100")
 dtype = "float16"
-# dtype = "float32"
+dtype = "float32"
 
 relay_mod, params, input_shape, output_shape = get_network(network, batch_size, layout, dtype=dtype)
 
@@ -154,9 +154,9 @@ def apply_opt_before_tuning(
         write_mod(relax_mod, log_path, "relay_translator_relax")
         relax_mod = relax.transform.AnnotateTIROpPattern()(relax_mod)
         write_mod(relax_mod, log_path, "AnnotateTIROpPattern")
-        relax_mod = relax.transform.FuseOps()(relax_mod)
+        # relax_mod = relax.transform.FuseOps()(relax_mod)
         write_mod(relax_mod, log_path, "FuseOps")
-        relax_mod = relax.transform.FuseTIR()(relax_mod)
+        # relax_mod = relax.transform.FuseTIR()(relax_mod)
         write_mod(relax_mod, log_path, "FuseTIR")
     return relax_mod
 
@@ -165,15 +165,15 @@ relax_mod = apply_opt_before_tuning(relay_mod, params, target)
 
 # benchmark with dlight default schedule
 with target:
-    schedule_rules = [
-        dl.gpu.GEMV(),
-        dl.gpu.Matmul(),
-        dl.gpu.Reduction(),
-        dl.gpu.GeneralReduction(),
-        dl.gpu.Fallback(),
-    ]
-    for rule in schedule_rules:
-        relax_mod = dl.ApplyDefaultSchedule(rule)(relax_mod)
+    relax_mod = dl.ApplyDefaultSchedule(dl.gpu.GEMV())(relax_mod)
+    print("GEMV")
+    relax_mod = dl.ApplyDefaultSchedule(dl.gpu.Matmul())(relax_mod)
+    # relax_mod = dl.ApplyDefaultSchedule(dl.gpu.Reduction())(relax_mod)
+    print("Reduction")
+    # relax_mod = dl.ApplyDefaultSchedule(dl.gpu.GeneralReduction())(relax_mod)
+    print("GeneralReduction")
+
+    relax_mod = dl.ApplyDefaultSchedule(dl.gpu.Fallback())(relax_mod)
 
 # run codegen
 write_mod(relax_mod, log_path, "apply_default_schedule")
