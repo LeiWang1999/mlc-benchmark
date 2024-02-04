@@ -39,10 +39,10 @@ benchmark_sets = [
 
 for get_prim_func, input_args in benchmark_sets:
     ir_module = get_prim_func(*input_args)
-    func = ir_module["main"].with_attr({"opt_shapes": {"m": [32, 64]}})
+    func = ir_module["main"]
     target = tvm.target.Target("nvidia/nvidia-a100")
     
-    dispatch_mod = fast_tune_with_dynamic_range(func, target, topk=5, parallel_build=True)
+    dispatch_mod = fast_tune_with_dynamic_range(func, target, topk=5, parallel_build=True, dynamic_range={"m": [32, 64]})
     print(dispatch_mod)
     
     test_m_dim = 1024

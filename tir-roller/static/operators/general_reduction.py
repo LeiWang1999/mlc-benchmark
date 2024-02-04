@@ -82,6 +82,7 @@ for get_prim_func, input_args, d_schedules in benchmark_sets:
         sch_default = rule.apply(func, target, False)
         if sch_default is None:
             continue
+        with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
         mod_default = tvm.build(sch_default.mod["main"], target="cuda")
         break
 

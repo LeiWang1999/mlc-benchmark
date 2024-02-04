@@ -139,7 +139,8 @@ def matmul_nt_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16"):
 benchmark_sets = [
     # (prim_func, input_args, default_dlight_schedule),
     # (matmul_nt, (1024, 1024, 1024, "float16", "float16"), Matmul),
-    # (matmul_nt, (8192, 8192, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (16, 8192, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (32, 8192, 8192, "float16", "float16"), Matmul),
     # (matmul_nt, (16384, 16384, 16384, "float16", "float16"), Matmul),
     # (matmul_nt, (16384, 16384, 16384, "int8", "int32"), Matmul),
     # (matmul_nn, (1024, 1024, 1024, "float16", "float16"), Matmul),
@@ -150,7 +151,7 @@ benchmark_sets = [
     # (matmul_nn, (1024, 1024, 1024, "float32", "float32"), Matmul),
     # (matmul_nn, (8192, 8192, 8192, "float32", "float32"), Matmul),
     # (matmul_nt_propagate_b, (16384, 16384, 16384, "int8", "int32"), Matmul),
-    (matmul_nt_propagate_b_f16_f16_mma, (16384, 16384, 16384), Matmul),
+    # (matmul_nt_propagate_b_f16_f16_mma, (16384, 16384, 16384), Matmul),
     # (matmul_nt_propagate_a_b, (16384, 16384, 16384, "int8", "int32"), Matmul),
     # (matmul_nt_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
 ]
@@ -173,7 +174,7 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     tune_start = time.time()
     cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)
     # print(best.sch.mod)
-    # print(best.code)
+    print(best.code)
     fast_tune_time = time.time() - tune_start
     print(
         "[FastDlight] The best latency of top 1 is {:.3f} ms".format(
@@ -191,7 +192,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     rule = d_schedule()
     default_tune_start = time.time()
     sch_default = rule.apply(func, target, False)
-    mod_default = tvm.build(sch_default.mod["main"], target="cuda")
+    with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
+        mod_default = tvm.build(sch_default.mod["main"], target="cuda")
     default_tune_time = time.time() - default_tune_start
 
     args = func.buffer_map.values()

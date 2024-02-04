@@ -92,7 +92,8 @@ print("[FastDlight] The best latency of top 20 is {:.3f} ms".format(best.latency
 rule = GEMV()
 default_tune_start = time.time()
 sch_default = rule.apply(func, target, False)
-mod_default = tvm.build(sch_default.mod["main"], target="cuda")
+with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
+        mod_default = tvm.build(sch_default.mod["main"], target="cuda")
 default_tune_time = time.time() - default_tune_start
 
 args = func.buffer_map.values()

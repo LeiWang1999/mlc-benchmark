@@ -65,7 +65,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     default_tune_start = time.time()
     sch_default = rule.apply(func, target, False)
 
-    mod_default = tvm.build(sch_default.mod["main"], target="cuda")
+    with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
+        mod_default = tvm.build(sch_default.mod["main"], target="cuda")
     default_tune_time = time.time() - default_tune_start
 
     args = func.buffer_map.values()
