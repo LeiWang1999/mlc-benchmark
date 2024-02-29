@@ -93,7 +93,7 @@ rand(std::vector<int> dims, curandGenerator_t curand_gen)
 }
 
 template <typename T>
-typename std::enable_if<(std::is_same<T, half>::value), Tensor<T>>::type
+typename std::enable_if<!(std::is_same<T, float>::value), Tensor<T>>::type
 rand(std::vector<int> dims, curandGenerator_t curand_gen)
 {
     Tensor<float> temp_tensor(dims);
@@ -103,20 +103,6 @@ rand(std::vector<int> dims, curandGenerator_t curand_gen)
     auto size = tensor.size();
     // Convert Tensor With Efficient Cuda Kernel
     convertType<<<(size + 255) / 256, 256>>>(temp_tensor.begin(), tensor.begin(), size);
-    return tensor;
-}
-
-template <typename T>
-typename std::enable_if<(!(std::is_same<T, half>::value || std::is_same<T, float>::value)), Tensor<T>>::type
-rand(std::vector<int> dims, curandGenerator_t curand_gen)
-{
-    Tensor<float> temp_tensor(dims);
-    curandGenerateUniform(curand_gen, temp_tensor.begin(), temp_tensor.size());
-
-    Tensor<T> tensor(dims);
-    auto size = tensor.size();
-    // Convert Tensor With Efficient Cuda Kernel
-    scaleType<<<(size + 255) / 256, 256>>>(temp_tensor.begin(), tensor.begin(), size, 255);
     return tensor;
 }
 
