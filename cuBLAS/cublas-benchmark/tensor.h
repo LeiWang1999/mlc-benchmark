@@ -11,6 +11,26 @@
 #include <thrust/fill.h>
 #include <thrust/copy.h>
 
+template <typename InputType, typename OutputType>
+__global__ void convertType(const InputType *input, OutputType *output, int numElements)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < numElements)
+    {
+        output[idx] = static_cast<OutputType>(input[idx]);
+    }
+}
+
+template <typename InputType, typename OutputType>
+__global__ void scaleType(const InputType *input, OutputType *output, int numElements, float ScaleFactor)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < numElements)
+    {
+        output[idx] = static_cast<OutputType>(input[idx] * ScaleFactor);
+    }
+}
+
 template <typename T>
 class Tensor
 {
@@ -73,25 +93,30 @@ rand(std::vector<int> dims, curandGenerator_t curand_gen)
 }
 
 template <typename T>
-typename std::enable_if<!(std::is_same<T, float>::value), Tensor<T>>::type
+typename std::enable_if<(std::is_same<T, half>::value), Tensor<T>>::type
 rand(std::vector<int> dims, curandGenerator_t curand_gen)
 {
+    Tensor<float> temp_tensor(dims);
+    curandGenerateUniform(curand_gen, temp_tensor.begin(), temp_tensor.size());
 
     Tensor<T> tensor(dims);
-    Tensor<float> tensor_f(dims);
-    curandGenerateUniform(curand_gen, tensor_f.begin(), tensor_f.size());
-    // copy data and print
-    // float *data = new float[tensor_f.size()];
-    // cudaMemcpy(data, tensor_f.begin(), sizeof(float) * tensor_f.size(), cudaMemcpyDeviceToHost);
-    // for (int i = 0; i < tensor_f.size(); i++)
-    // {
-    //     printf("%f ", data[i]);
-    // }
-    // printf("\n");
-    thrust::copy(thrust::device_ptr<float>(tensor_f.begin()),
-                 thrust::device_ptr<float>(tensor_f.end()),
-                 thrust::device_ptr<T>(tensor.begin()));
+    auto size = tensor.size();
+    // Convert Tensor With Efficient Cuda Kernel
+    convertType<<<(size + 255) / 256, 256>>>(temp_tensor.begin(), tensor.begin(), size);
+    return tensor;
+}
 
+template <typename T>
+typename std::enable_if<(!(std::is_same<T, half>::value || std::is_same<T, float>::value)), Tensor<T>>::type
+rand(std::vector<int> dims, curandGenerator_t curand_gen)
+{
+    Tensor<float> temp_tensor(dims);
+    curandGenerateUniform(curand_gen, temp_tensor.begin(), temp_tensor.size());
+
+    Tensor<T> tensor(dims);
+    auto size = tensor.size();
+    // Convert Tensor With Efficient Cuda Kernel
+    scaleType<<<(size + 255) / 256, 256>>>(temp_tensor.begin(), tensor.begin(), size, 255);
     return tensor;
 }
 

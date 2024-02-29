@@ -20,22 +20,6 @@
 
 // Vector saves m, n, k, a_t, b_t
 std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
-
-    std::make_tuple(16384, 16384, 16384, false, false),
-    std::make_tuple(8192, 43008, 14336, false, false),
-    std::make_tuple(8192, 14336, 14336, false, false),
-    std::make_tuple(8192, 57344, 14336, false, false),
-    std::make_tuple(8192, 14336, 57344, false, false),
-    std::make_tuple(8192, 9216, 9216, false, false),
-    std::make_tuple(8192, 36864, 9216, false, false),
-    std::make_tuple(8192, 9216, 36864, false, false),
-    std::make_tuple(8192, 8192, 8192, false, false),
-    std::make_tuple(8192, 22016, 8192, false, false),
-    std::make_tuple(8192, 8192, 22016, false, false),
-    std::make_tuple(8192, 28672, 8192, false, false),
-    std::make_tuple(8192, 8192, 22016, false, false),
-
-    
     std::make_tuple(16384, 16384, 16384, false, true),
     std::make_tuple(8192, 43008, 14336, false, true),
     std::make_tuple(8192, 14336, 14336, false, true),
@@ -102,7 +86,7 @@ int time_gemm(Tensor<T1> A, Tensor<T1> B, Tensor<T2> C, bool a_t, bool b_t,
     cudaDataType_t compute_type = CUDA_R_32F;
     cublasGemmAlgo_t algo;
 
-    if (std::is_same<T1, uint16_t>::value)
+    if (std::is_same<T1, uint16_t>::value || std::is_same<T1, half>::value)
     {
         A_type = CUDA_R_16F;
         B_type = CUDA_R_16F;
@@ -279,11 +263,11 @@ int main(int argc, char **argv)
 
             // fp16 tensor core benchmark
             {
-                auto a = rand<uint16_t>({a_t ? k : m, a_t ? m : k}, curand_gen);
-                auto b = rand<uint16_t>({b_t ? n : k, b_t ? k : n}, curand_gen);
-                auto c = zeros<uint16_t>({m, n});
-                time_ms = time_gemm<uint16_t, uint16_t>(a, b, c, a_t, b_t,
-                                                        cublas_handle, true);
+                auto a = rand<half>({a_t ? k : m, a_t ? m : k}, curand_gen);
+                auto b = rand<half>({b_t ? n : k, b_t ? k : n}, curand_gen);
+                auto c = zeros<half>({m, n});
+                time_ms = time_gemm<half, half>(a, b, c, a_t, b_t,
+                                                cublas_handle, true);
                 std::cout << "," << std::setprecision(6) << time_ms / 1000.0;
             }
 
@@ -302,7 +286,7 @@ int main(int argc, char **argv)
                 auto c = zeros<int>({pad_m, n});
                 time_ms =
                     time_gemm<uint8_t, int>(a, b, c, a_t, b_t, cublas_handle, true);
-                std::cout << "," << std::setprecision(6) << time_ms;
+                std::cout << "," << std::setprecision(6) << time_ms / 1000.0;
             }
 
             std::cout << std::endl;
