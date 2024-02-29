@@ -52,23 +52,23 @@ llm_shapes = [
     (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "float16", "float16"), Matmul),
     (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "float16", "float16"), Matmul),
     
-    # # square test
-    # (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "int8", "int8", "int32"), Matmul),
-    # # BLOOM-176B
-    # (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "int8", "int8", "int32"), Matmul),
-    # # OPT-65B
-    # (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "int8", "int8", "int32"), Matmul),
-    # # LLAMA-70B/65B
-    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "int8", "int8", "int32"), Matmul),
-    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "int8", "int8", "int32"), Matmul),
+    # square test
+    (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "int8", "int8", "int32"), Matmul),
+    # BLOOM-176B
+    (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "int8", "int8", "int32"), Matmul),
+    # OPT-65B
+    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "int8", "int8", "int32"), Matmul),
+    # LLAMA-70B/65B
+    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "int8", "int8", "int32"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "int8", "int8", "int32"), Matmul),
 ]
 
 benchmark_sets = []
