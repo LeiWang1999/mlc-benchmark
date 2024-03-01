@@ -20,6 +20,20 @@
 
 // Vector saves m, n, k, a_t, b_t
 std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
+    std::make_tuple(1, 16384, 16384, false, true),
+    std::make_tuple(1, 43008, 14336, false, true),
+    std::make_tuple(1, 14336, 14336, false, true),
+    std::make_tuple(1, 57344, 14336, false, true),
+    std::make_tuple(1, 14336, 57344, false, true),
+    std::make_tuple(1, 9216, 9216, false, true),
+    std::make_tuple(1, 36864, 9216, false, true),
+    std::make_tuple(1, 9216, 36864, false, true),
+    std::make_tuple(1, 8192, 8192, false, true),
+    std::make_tuple(1, 22016, 8192, false, true),
+    std::make_tuple(1, 8192, 22016, false, true),
+    std::make_tuple(1, 28672, 8192, false, true),
+    std::make_tuple(1, 8192, 28672, false, true),
+
     std::make_tuple(16384, 16384, 16384, false, true),
     std::make_tuple(8192, 43008, 14336, false, true),
     std::make_tuple(8192, 14336, 14336, false, true),
@@ -33,7 +47,6 @@ std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
     std::make_tuple(8192, 8192, 22016, false, true),
     std::make_tuple(8192, 28672, 8192, false, true),
     std::make_tuple(8192, 8192, 22016, false, true),
-
 };
 
 /*
@@ -77,7 +90,8 @@ int time_gemm(Tensor<T1> A, Tensor<T1> B, Tensor<T2> C, bool a_t, bool b_t,
     int n = a_t ? A.dims()[1] : A.dims()[0];
     int k = a_t ? A.dims()[0] : A.dims()[1];
 
-    int numRepeats = 10;
+    int numRepeats;
+    int minimal_repeat_ms = 100;
     cublasStatus_t stat;
 
     cudaDataType_t A_type = CUDA_R_32F;
@@ -103,6 +117,7 @@ int time_gemm(Tensor<T1> A, Tensor<T1> B, Tensor<T2> C, bool a_t, bool b_t,
     }
 
     algo = use_tensor_core ? CUBLAS_GEMM_DFALT_TENSOR_OP : CUBLAS_GEMM_DFALT;
+    auto warmup_start = std::chrono::steady_clock::now();
 
     stat =
         cublasGemmEx(cublas_handle,
@@ -114,6 +129,14 @@ int time_gemm(Tensor<T1> A, Tensor<T1> B, Tensor<T2> C, bool a_t, bool b_t,
     {
         throw std::runtime_error("sgemm failed");
     }
+    cudaDeviceSynchronize();
+
+    auto warmup_end = std::chrono::steady_clock::now();
+    auto periter_duration = static_cast<int>(
+                                std::chrono::duration<double, std::micro>(warmup_end - warmup_start).count()) *
+                            1e3;
+
+    numRepeats = std::max(5, int(minimal_repeat_ms / periter_duration));
 
     cudaDeviceSynchronize();
 
@@ -201,7 +224,7 @@ int main(int argc, char **argv)
             int m, n, k;
             bool a_t, b_t;
             std::tie(m, n, k, a_t, b_t) = problem;
-            int time_ms;
+            int time_us;
 
             std::cout << m << ",";
             std::cout << n << ",";
@@ -221,9 +244,9 @@ int main(int argc, char **argv)
                 auto a = rand<float>({a_t ? k : m, a_t ? m : k}, curand_gen);
                 auto b = rand<float>({b_t ? n : k, b_t ? k : n}, curand_gen);
                 auto c = zeros<float>({m, n});
-                time_ms =
+                time_us =
                     time_gemm<float, float>(a, b, c, a_t, b_t, cublas_handle, false);
-                std::cout << "," << std::setprecision(6) << time_ms;
+                std::cout << "," << std::setprecision(6) << time_us / 1000.0;
             }
 
             // fp16 benchmark
@@ -231,9 +254,9 @@ int main(int argc, char **argv)
                 auto a = rand<uint16_t>({a_t ? k : m, a_t ? m : k}, curand_gen);
                 auto b = rand<uint16_t>({b_t ? n : k, b_t ? k : n}, curand_gen);
                 auto c = zeros<uint16_t>({m, n});
-                time_ms = time_gemm<uint16_t, uint16_t>(a, b, c, a_t, b_t,
+                time_us = time_gemm<uint16_t, uint16_t>(a, b, c, a_t, b_t,
                                                         cublas_handle, false);
-                std::cout << "," << std::setprecision(6) << time_ms;
+                std::cout << "," << std::setprecision(6) << time_us / 1000.0;
             }
 
             // int8 benchmark
@@ -249,9 +272,9 @@ int main(int argc, char **argv)
                 auto a = rand<uint8_t>({a_t ? k : pad_m, a_t ? pad_m : k}, curand_gen);
                 auto b = rand<uint8_t>({b_t ? n : k, b_t ? k : n}, curand_gen);
                 auto c = zeros<int>({pad_m, n});
-                time_ms =
+                time_us =
                     time_gemm<uint8_t, int>(a, b, c, a_t, b_t, cublas_handle, false);
-                std::cout << "," << std::setprecision(6) << time_ms;
+                std::cout << "," << std::setprecision(6) << time_us / 1000.0;
             }
 
             // set cublas to use tensor core
@@ -266,9 +289,9 @@ int main(int argc, char **argv)
                 auto a = rand<half>({a_t ? k : m, a_t ? m : k}, curand_gen);
                 auto b = rand<half>({b_t ? n : k, b_t ? k : n}, curand_gen);
                 auto c = zeros<half>({m, n});
-                time_ms = time_gemm<half, half>(a, b, c, a_t, b_t,
+                time_us = time_gemm<half, half>(a, b, c, a_t, b_t,
                                                 cublas_handle, true);
-                std::cout << "," << std::setprecision(6) << time_ms / 1000.0;
+                std::cout << "," << std::setprecision(6) << time_us / 1000.0;
             }
 
             // int8 tensor core benchmark
@@ -284,9 +307,9 @@ int main(int argc, char **argv)
                 auto a = rand<uint8_t>({a_t ? k : pad_m, a_t ? pad_m : k}, curand_gen);
                 auto b = rand<uint8_t>({b_t ? n : k, b_t ? k : n}, curand_gen);
                 auto c = zeros<int>({pad_m, n});
-                time_ms =
+                time_us =
                     time_gemm<uint8_t, int>(a, b, c, a_t, b_t, cublas_handle, true);
-                std::cout << "," << std::setprecision(6) << time_ms / 1000.0;
+                std::cout << "," << std::setprecision(6) << time_us / 1000.0;
             }
 
             std::cout << std::endl;
