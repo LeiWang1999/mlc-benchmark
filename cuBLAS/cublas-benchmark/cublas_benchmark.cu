@@ -20,6 +20,8 @@
 
 // Vector saves m, n, k, a_t, b_t
 std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
+
+    // gemv
     std::make_tuple(1, 16384, 16384, false, true),
     std::make_tuple(1, 43008, 14336, false, true),
     std::make_tuple(1, 14336, 14336, false, true),
@@ -46,7 +48,8 @@ std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
     std::make_tuple(8192, 22016, 8192, false, true),
     std::make_tuple(8192, 8192, 22016, false, true),
     std::make_tuple(8192, 28672, 8192, false, true),
-    std::make_tuple(8192, 8192, 22016, false, true),
+    std::make_tuple(8192, 8192, 28672, false, true),
+
 };
 
 /*
