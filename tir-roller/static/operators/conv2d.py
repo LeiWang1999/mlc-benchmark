@@ -59,8 +59,8 @@ def conv2d_nhwc_hwio(n, f, h, w, c, kh, kw, s, d, p, in_dtype="float16", out_dty
 benchmark_sets = [
     # (prim_func, input_args, default_dlight_schedule),
     (conv2d_nhwc_hwio, (128, 64, 224, 224, 3, 7, 7, 2, 1, 3, "float16", "float16"), Matmul),
-    (conv2d_nhwc_hwio, (128, 64, 224, 224, 64, 1, 1, 2, 1, 3, "float16", "float16"), Matmul),
-    (conv2d_nhwc_hwio, (128, 64, 224, 224, 3, 7, 7, 2, 1, 3, "float32", "float32"), Matmul),
+    # (conv2d_nhwc_hwio, (128, 64, 224, 224, 64, 1, 1, 2, 1, 3, "float16", "float16"), Matmul),
+    # (conv2d_nhwc_hwio, (128, 64, 224, 224, 3, 7, 7, 2, 1, 3, "float32", "float32"), Matmul),
 ]
 benchmark_results = {}
 for get_prim_func, input_args, d_schedule in benchmark_sets:

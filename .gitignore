@@ -60,3 +60,6 @@ doc/doxygen/html/*
 
 # pkl
 *.pkl_*
+
+# progress
+progress

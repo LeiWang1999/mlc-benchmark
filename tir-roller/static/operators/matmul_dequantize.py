@@ -263,8 +263,58 @@ def matmul_nt_af4_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16"
 
 benchmark_sets = [
     # (prim_func, input_args, default_dlight_schedule),
-    # (matmul_nt_i4, (16384, 16384, 16384, "float16", "float16"), Matmul),
-    (matmul_nt_i4_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (32, 16384, 16384, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (16, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (16, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (16, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (16, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (32, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (32, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (32, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (32, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (64, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (64, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (64, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (64, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (128, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (128, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (128, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (128, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (4096, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (4096, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (4096, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (4096, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (8192, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (8192, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (8192, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4, (8192, 14336, 57344, "float16", "float16"), Matmul),
+
+    (matmul_nt_i4_propagate_b, (16, 43008, 14336, "float16", "float16"), Matmul),
+    (matmul_nt_i4_propagate_b, (16, 14336, 14336, "float16", "float16"), Matmul),
+    (matmul_nt_i4_propagate_b, (16, 57344, 14336, "float16", "float16"), Matmul),
+    (matmul_nt_i4_propagate_b, (16, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (32, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (32, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (32, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (32, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (64, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (64, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (64, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (64, 14336, 57344, "float16", "float16"), Matmul),
+    
+    # (matmul_nt_i4_propagate_a_b, (16, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (16, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (16, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (16, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (32, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (32, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (32, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (32, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (64, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (64, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (64, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_a_b, (64, 14336, 57344, "float16", "float16"), Matmul),
+    # (matmul_nt_i4_propagate_b, (32, 16384, 16384, "float16", "float16"), Matmul),
     # (matmul_nt_i4_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
     # (matmul_nt_af4, (16384, 16384, 16384, "float16", "float16"), Matmul),
     # (matmul_nt_af4_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
@@ -287,7 +337,7 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
 
     tune_start = time.time()
     cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)
-    print(best.code)
+    # print(best.code)
     fast_tune_time = time.time() - tune_start
     print(
         "[FastDlight] The best latency of top 1 is {:.3f} ms".format(
@@ -299,3 +349,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
             best.latency * 1e3
         )
     )
+
+    benchmark_results[f"{get_prim_func.__name__}-{'-'.join([str(i) for i in input_args])}"] = best.latency * 1e3
+    
+for k, v in benchmark_results.items():
+    print(f"{k}: {v} ms")
