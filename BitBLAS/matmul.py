@@ -3,6 +3,7 @@
 import numpy as np
 import tvm
 from tvm.script import tir as T
+import bitblas
 from bitblas.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from bitblas.base.roller.arch import CUDA
 from bitblas.gpu.matmul_analysis import get_tensorized_func_and_tags
@@ -35,6 +36,24 @@ test_shapes = [
 
 
 llm_shapes = [
+    # square test
+    (matmul_nt, (1, 16384, 16384, "float16", "float16"), Matmul),
+    # BLOOM-176B
+    (matmul_nt, (1, 43008, 14336, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 14336, 14336, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 57344, 14336, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 14336, 57344, "float16", "float16"), Matmul),
+    # # OPT-65B
+    (matmul_nt, (1, 9216, 9216, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 36864, 9216, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 9216, 36864, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 22016, 8192, "float16", "float16"), Matmul),
+    # # LLAMA-70B/65B
+    (matmul_nt, (1, 8192, 22016, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 8192, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 28672, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (1, 8192, 28672, "float16", "float16"), Matmul),
+    
     # square test
     (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
     # BLOOM-176B
@@ -110,19 +129,31 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
 
     rule = d_schedule()
     default_tune_start = time.time()
-    sch_default = rule.apply(func, target, False)
-    with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
-        mod_default = tvm.build(sch_default.mod["main"], target="cuda")
+    with arch.target:
+        mod = bitblas.ApplyDefaultSchedule(  # pylint: disable=not-callable
+            bitblas.gpu.Matmul(),
+            bitblas.gpu.GEMV(),
+            bitblas.gpu.Reduction(),
+            bitblas.gpu.GeneralReduction(),
+            bitblas.gpu.Fallback(),
+        )(ir_module)
+    try:
+        with tvm.transform.PassContext(config={"tir.use_async_copy": True}):
+            mod_default = tvm.build(mod, target="cuda")
+    except Exception:
+        mod_default = None
     default_tune_time = time.time() - default_tune_start
 
     args = func.buffer_map.values()
 
     profile_tensors = best.profile_tensors
-
-    timer_cuda_mod = mod_default.time_evaluator(
-        mod_default.entry_name, arch.device, number=5
-    )
-    t = timer_cuda_mod(*profile_tensors).mean
+    if mod_default is not None:
+        timer_cuda_mod = mod_default.time_evaluator(
+            mod_default.entry_name, arch.device, number=5
+        )
+        t = timer_cuda_mod(*profile_tensors).mean
+    else:
+        t = 1e4 - 1
 
     print("Time cost of Dlight default schedule: {:.3f} ms".format(t * 1e3))
 
@@ -132,7 +163,7 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
             "fast_dlight_top1_latency": cpresults[0].latency * 1e3,
             "fast_dlight_top20_latency": best.latency * 1e3,
             "default_dlight_tune_time": default_tune_time,
-            "default_dlight_latency": t * 1e3,
+            "default_dlight_latency": t * 1e3 if t is not None else "Failed",
         }
     }
 
@@ -168,6 +199,6 @@ for config, values in benchmark_results.items():
         f"{values['fast_dlight_top1_latency']:.3f} ms",
         f"{values['fast_dlight_top20_latency']:.3f} ms",
         str(values["default_dlight_tune_time"]),
-        f"{values['default_dlight_latency']:.3f} ms",
+        f"{values['default_dlight_latency']:.3e} ms",
     ]
     print("".join(word.ljust(col_width) for word in row))

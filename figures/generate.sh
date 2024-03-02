@@ -1,0 +1,6 @@
+python operator_figures_3090_af4_gemm.py
+python operator_figures_3090_af4_gemv.py
+python operator_figures_3090_fp16_gemm.py
+python operator_figures_3090_int8_gemm.py
+python operator_figures_a100_int4_gemm.py
+python operator_figures_a100_int4_gemv.py
