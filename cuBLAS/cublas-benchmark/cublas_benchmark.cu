@@ -30,9 +30,9 @@ std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
     std::make_tuple(1, 9216, 9216, false, true),
     std::make_tuple(1, 36864, 9216, false, true),
     std::make_tuple(1, 9216, 36864, false, true),
-    std::make_tuple(1, 8192, 8192, false, true),
     std::make_tuple(1, 22016, 8192, false, true),
     std::make_tuple(1, 8192, 22016, false, true),
+    std::make_tuple(1, 8192, 8192, false, true),
     std::make_tuple(1, 28672, 8192, false, true),
     std::make_tuple(1, 8192, 28672, false, true),
 
@@ -44,9 +44,9 @@ std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
     std::make_tuple(8192, 9216, 9216, false, true),
     std::make_tuple(8192, 36864, 9216, false, true),
     std::make_tuple(8192, 9216, 36864, false, true),
-    std::make_tuple(8192, 8192, 8192, false, true),
     std::make_tuple(8192, 22016, 8192, false, true),
     std::make_tuple(8192, 8192, 22016, false, true),
+    std::make_tuple(8192, 8192, 8192, false, true),
     std::make_tuple(8192, 28672, 8192, false, true),
     std::make_tuple(8192, 8192, 28672, false, true),
 
