@@ -1,7 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 import tvm
-from tvm.script import tir as T
 import bitblas
 from bitblas.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from bitblas.base.roller.arch import CUDA
@@ -9,16 +8,17 @@ from bitblas.gpu.matmul_analysis import get_tensorized_func_and_tags
 from bitblas.gpu import Matmul
 from bitblas.utils import get_target_from_env
 from bitblas.base.utils import apply_and_build
-from bitblas.ops.impl.matmul_impl import (
-    matmul_nt,
-    matmul_nt,
-    matmul_nt_propagate_a_propagate_b,
+from bitblas.ops.impl.matmul_dequantize_impl import (
+    matmul_nt_dequantize_b,
+    matmul_nt_dequantize_b_propagate_a_propagate_b,
 )
 import time
 import argparse
 
+# append a parser for the benchmark set
+
 parser = argparse.ArgumentParser(
-    description="Benchmark BitBLAS int4 on a specific target."
+    description="Benchmark BitBLAS int8xint1 on a specific target."
 )
 parser.add_argument(
     "--target",
@@ -40,72 +40,38 @@ parser.add_argument(
 parser.add_argument(
     "--benchmark_sets",
     nargs="+",
-    default=["llm_shapes"],
+    default=["llm_int8xint1"],
     help="List of benchmark sets, e.g., llm_int8xint1_bs4096",
 )
 
 args = parser.parse_args()
+batch_seq = args.batch_seq
 group_size = args.group_size
-
-
+prim_func = (
+    matmul_nt_dequantize_b
+    if batch_seq == 1
+    else matmul_nt_dequantize_b_propagate_a_propagate_b
+)
 # fmt:off
 
-llm_shape_fp16xfp16 = [
+llm_int8xint1 = [
     # square test
-    (matmul_nt, (1, 16384, 16384, "float16", "float16"), Matmul),
+    (prim_func, (batch_seq, 16384, 16384, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
     # BLOOM-176B
-    (matmul_nt, (1, 43008, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 14336, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 57344, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 14336, 57344, "float16", "float16"), Matmul),
+    (prim_func, (batch_seq, 43008, 14336, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 14336, 14336, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 57344, 14336, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 14336, 57344, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
     # # OPT-65B
-    (matmul_nt, (1, 9216, 9216, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 36864, 9216, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 9216, 36864, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 22016, 8192, "float16", "float16"), Matmul),
-    # # LLAMA-70B/65B
-    (matmul_nt, (1, 8192, 22016, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 8192, 8192, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 28672, 8192, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 8192, 28672, "float16", "float16"), Matmul),
-    
-    # square test
-    (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
-    # BLOOM-176B
-    (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "float16", "float16"), Matmul),
-    # # OPT-65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "float16", "float16"), Matmul),
-    # # LLAMA-70B/65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "float16", "float16"), Matmul),
-]
-
-llm_shape_int8xint8 = [
-    # square test
-    (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "int8", "int8", "int32"), Matmul),
-    # BLOOM-176B
-    (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "int8", "int8", "int32"), Matmul),
-    # OPT-65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "int8", "int8", "int32"), Matmul),
+    (prim_func, (batch_seq, 9216, 9216, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 36864, 9216, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 9216, 36864, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 22016, 8192, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
     # LLAMA-70B/65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "int8", "int8", "int32"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "int8", "int8", "int32"), Matmul),    
+    (prim_func, (batch_seq, 8192, 22016, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 8192, 8192, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 28672, 8192, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (prim_func, (batch_seq, 8192, 28672, "int8", "int8", "int32", 1, "int8", "uint", False, False, group_size, True, False), Matmul),
 ]
 
 # fmt:on
@@ -114,9 +80,6 @@ target = tvm.target.Target(args.target)
 benchmark_sets = []
 for benchmark_set in args.benchmark_sets:
     benchmark_sets.extend(eval(benchmark_set))
-benchmark_results = {}
-
-target = tvm.target.Target(get_target_from_env())
 
 benchmark_results = {}
 for get_prim_func, input_args, d_schedule in benchmark_sets:
@@ -134,7 +97,7 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     configs = policy.emit_config(20)
 
     tune_start = time.time()
-    cpresults, best = apply_and_build(func, configs, arch, parallel_build=False)
+    cpresults, best = apply_and_build(func, configs, arch, parallel_build=True)
     fast_tune_time = time.time() - tune_start
     print(
         "[BitBLAS] The best latency of top 1 is {:.3f} ms".format(
@@ -162,6 +125,7 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
             mod_default = tvm.build(mod, target="cuda")
     except Exception:
         mod_default = None
+
     default_tune_time = time.time() - default_tune_start
 
     args = func.buffer_map.values()

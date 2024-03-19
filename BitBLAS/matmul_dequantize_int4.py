@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-import numpy as np
 import tvm
 from tvm.script import tir as T
 import bitblas
@@ -15,10 +14,40 @@ from bitblas.ops.impl.matmul_dequantize_impl import (
     matmul_nt_dequantize_b_propagate_a_propagate_b,
 )
 import time
+import argparse
 
-group_size = -1
+parser = argparse.ArgumentParser(
+    description="Benchmark BitBLAS int4 on a specific target."
+)
+parser.add_argument(
+    "--target",
+    type=str,
+    default=get_target_from_env(),
+)
+parser.add_argument(
+    "--batch_seq",
+    type=int,
+    default=1,
+    help="The batch size of the sequence",
+)
+parser.add_argument(
+    "group_size",
+    type=int,
+    default=-1,
+    help="The group size of the sequence",
+)
+parser.add_argument(
+    "--benchmark_sets",
+    nargs="+",
+    default=["llm_shapes"],
+    help="List of benchmark sets, e.g., llm_int8xint1_bs4096",
+)
+
+args = parser.parse_args()
+group_size = args.group_size
+
 # fmt:off
-llm_shapes = [
+llm_shape_fp16xint4 = [
     # square test
     (matmul_nt_dequantize_b, (1, 16384, 16384, "float16", "float16", "float16", 4, "int8", "int", True, False, group_size, True, False), Matmul),
     # BLOOM-176B
@@ -54,7 +83,9 @@ llm_shapes = [
     (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 8192, 8192, "float16", "float16", "float16", 4, "int8", "int", True, False, group_size, True, False), Matmul),
     (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 28672, 8192, "float16", "float16", "float16", 4, "int8", "int", True, False, group_size, True, False), Matmul),
     (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 8192, 28672, "float16", "float16", "float16", 4, "int8", "int", True, False, group_size, True, False), Matmul),
+]
 
+llm_shape_int8xint4 = [
     # square test
     (matmul_nt_dequantize_b, (1, 16384, 16384, "int8", "int8", "int32", 2, "int8", "uint", False, False, -1, True, False), Matmul),
     # BLOOM-176B
@@ -93,14 +124,15 @@ llm_shapes = [
 
 ]
 
-benchmark_sets = []
-benchmark_sets.extend(llm_shapes)
 
 # fmt:on
 
-target = tvm.target.Target(get_target_from_env())
-
+target = tvm.target.Target(args.target)
+benchmark_sets = []
+for benchmark_set in args.benchmark_sets:
+    benchmark_sets.extend(eval(benchmark_set))
 benchmark_results = {}
+
 for get_prim_func, input_args, d_schedule in benchmark_sets:
     ir_module = get_prim_func(*input_args)
     func = ir_module["main"]
@@ -120,11 +152,11 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     fast_tune_time = time.time() - tune_start
     print(
         "[BitBLAS] The best latency of top 1 is {:.3f} ms".format(
-            cpresults[0].latency * 1e3
+            cpresults[0].latency
         )
     )
     print(
-        "[BitBLAS] The best latency of top 20 is {:.3f} ms".format(best.latency * 1e3)
+        "[BitBLAS] The best latency of top 20 is {:.3f} ms".format(best.latency)
     )
 
     # evaluate the performance of the default schedule
@@ -163,8 +195,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     profile_config = {
         f"{get_prim_func.__name__}-{'-'.join([str(i) for i in input_args])}": {
             "fast_dlight_top20_tune_time": fast_tune_time,
-            "fast_dlight_top1_latency": cpresults[0].latency * 1e3,
-            "fast_dlight_top20_latency": best.latency * 1e3,
+            "fast_dlight_top1_latency": cpresults[0].latency,
+            "fast_dlight_top20_latency": best.latency,
             "default_dlight_tune_time": default_tune_time,
             "default_dlight_latency": t * 1e3 if t is not None else "Failed",
         }
