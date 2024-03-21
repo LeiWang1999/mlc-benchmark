@@ -106,5 +106,5 @@ ax.grid(False)
 plt.title("Speedup of GEMM on A100 (FP16)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_a100_fp16_gemm_e8.pdf")
-plt.savefig("png/op_benchmark_a100_fp16_gemm_e8.png",  bbox_inches='tight', transparent=False, dpi=150)
+plt.savefig(f"pdf/op_benchmark_a100_fp16_gemm_e{num_ops}.pdf")
+plt.savefig(f"png/op_benchmark_a100_fp16_gemm_e{num_ops}.png",  bbox_inches='tight', transparent=False, dpi=150)

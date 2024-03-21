@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data.a100_gemm import s4_gemm_provider as providers
 from data.a100_gemm import s4_gemm_times_data as times_data
-num_ops = 8
+num_ops = 7
 providers = providers[:num_ops]
 for i in range(len(times_data)):
     times_data[i] = (times_data[i][0], times_data[i][1][:num_ops])
@@ -54,7 +54,7 @@ hatch_patterns = [
 x = np.arange(len(providers))
 
 # Set the width of the bars
-bar_width = 0.14
+bar_width = 0.12
 
 # Plotting
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -84,7 +84,7 @@ for i, (label, speedup) in enumerate(speed_up_data):
 max_speedup = max([max(speedup) for _, speedup in speed_up_data])
 ax.set_ylim(0, max_speedup * 1.2)  
 # 调整图例位置和大小
-legend_fontsize = 11
+legend_fontsize = 10
 
 handles, labels = ax.get_legend_handles_labels()
 
@@ -92,8 +92,8 @@ handles, labels = ax.get_legend_handles_labels()
 ax.legend(
     handles,
     labels,
-    loc="upper center",
-    bbox_to_anchor=(0.5, 1.0),
+    loc="upper right",
+    bbox_to_anchor=(1.0, 1.0),
     ncol=(len(labels) + 1) // 3 + 1,
     fontsize=legend_fontsize,
     frameon=False,
@@ -112,5 +112,5 @@ ax.grid(False)
 plt.title("Speedup of GEMM on A100 (Weight Quantize)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_a100_wq_gemm_e8.pdf")
-plt.savefig("png/op_benchmark_a100_wq_gemm_e8.png", bbox_inches='tight', dpi=150)
+plt.savefig(f"pdf/op_benchmark_a100_wq_gemm_e{num_ops}.pdf")
+plt.savefig(f"png/op_benchmark_a100_wq_gemm_e{num_ops}.png", bbox_inches='tight', dpi=150)
