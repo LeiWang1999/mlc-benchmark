@@ -2,10 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data.gtx3090_gemm import fp16_gemm_provider as providers
 from data.gtx3090_gemm import f16_gemm_times_data as times_data
-num_ops = 8
-providers = providers[:num_ops]
-for i in range(len(times_data)):
-    times_data[i] = (times_data[i][0], times_data[i][1][:num_ops])
+
 _1x_baseline = "cuBLAS"
 _1x_baseline_times = dict(times_data)[_1x_baseline]
 
@@ -46,10 +43,10 @@ hatch_patterns = ["x", "\\", "*", "o", "O", ".", "-", "+"]
 x = np.arange(len(providers))
 
 # Set the width of the bars
-bar_width = 0.21
+bar_width = 0.25
 
 # Plotting
-fig, ax = plt.subplots(figsize=(12, 5))
+fig, ax = plt.subplots(figsize=(12, 4))
 x = np.arange(len(providers))
 
 # Draw cublas as a horizontal dashed line
@@ -107,4 +104,4 @@ plt.title("Speedup of GEMM on GTX3090 (FP16)", fontsize=16)
 
 # Save the plot to a file
 plt.savefig("pdf/op_benchmark_3090_fp16_gemm.pdf")
-plt.savefig("png/op_benchmark_3090_fp16_gemm.png",  bbox_inches='tight', transparent=True, dpi=150)
+plt.savefig("png/op_benchmark_3090_fp16_gemm.png", dpi=150)

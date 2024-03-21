@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from data.gtx3090_gemm import fp16_gemm_provider as providers
-from data.gtx3090_gemm import f16_gemm_times_data as times_data
+from data.gtx3090_gemm import s8_gemm_provider as providers
+from data.gtx3090_gemm import s8_gemm_times_data as times_data
 num_ops = 8
 providers = providers[:num_ops]
 for i in range(len(times_data)):
@@ -40,13 +40,22 @@ colers_sets = [
     (248 / 255, 231 / 255, 210 / 255),
     (182 / 255, 110 / 255, 151 / 255),
 ]
-hatch_patterns = ["x", "\\", "*", "o", "O", ".", "-", "+"]
+hatch_patterns = [
+    "x",
+    "\\",
+    "*",
+    "o",
+    "O",
+    ".",
+    "-",
+    "+"
+]
 
 # Create an array for x-axis positions
 x = np.arange(len(providers))
 
 # Set the width of the bars
-bar_width = 0.21
+bar_width = 0.2
 
 # Plotting
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -75,8 +84,7 @@ for i, (label, speedup) in enumerate(speed_up_data):
     )
 
 # set y-limit
-max_speedup = max([max(speedup) for _, speedup in speed_up_data])
-ax.set_ylim(0, max_speedup * 1.2)
+ax.set_ylim(0, 1.5)
 # 调整图例位置和大小
 legend_fontsize = 14
 
@@ -103,8 +111,8 @@ ax.grid(axis="y", linestyle="--", linewidth=0.5)
 ax.grid(False)
 
 # add a title
-plt.title("Speedup of GEMM on GTX3090 (FP16)", fontsize=16)
+plt.title("Speedup of GEMM on GTX3090 (INT8)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_3090_fp16_gemm.pdf")
-plt.savefig("png/op_benchmark_3090_fp16_gemm.png",  bbox_inches='tight', transparent=True, dpi=150)
+plt.savefig("pdf/op_benchmark_3090_s8_gemm_e8.pdf")
+plt.savefig("png/op_benchmark_3090_s8_gemm_e8.png",bbox_inches='tight', dpi=150)

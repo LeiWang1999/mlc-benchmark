@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from data.gtx3090_gemm import fp16_gemm_provider as providers
-from data.gtx3090_gemm import f16_gemm_times_data as times_data
+from data.a100_gemm import fp16_gemm_provider as providers
+from data.a100_gemm import f16_gemm_times_data as times_data
 num_ops = 8
 providers = providers[:num_ops]
 for i in range(len(times_data)):
@@ -103,8 +103,8 @@ ax.grid(axis="y", linestyle="--", linewidth=0.5)
 ax.grid(False)
 
 # add a title
-plt.title("Speedup of GEMM on GTX3090 (FP16)", fontsize=16)
+plt.title("Speedup of GEMM on A100 (FP16)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_3090_fp16_gemm.pdf")
-plt.savefig("png/op_benchmark_3090_fp16_gemm.png",  bbox_inches='tight', transparent=True, dpi=150)
+plt.savefig("pdf/op_benchmark_a100_fp16_gemm_e8.pdf")
+plt.savefig("png/op_benchmark_a100_fp16_gemm_e8.png",  bbox_inches='tight', transparent=False, dpi=150)
