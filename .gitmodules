@@ -10,3 +10,6 @@
 [submodule "TenorrtLLM/lowprecision_kernels/tvm"]
 	path = TenorrtLLM/lowprecision_kernels/tvm
 	url = https://github.com/apache/tvm
+[submodule "CUTLASS/cutlass"]
+	path = CUTLASS/cutlass
+	url = https://github.com/NVIDIA/cutlass
