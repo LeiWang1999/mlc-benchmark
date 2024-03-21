@@ -1,8 +1,6 @@
 #!/bin/bash
 
-git clone --recursive https://github.com/apache/tvm ft_tvm
-cd ft_tvm
-git checkout 1afbf20
+cd tvm
 git submodule update --init --recursive
 mkdir build
 cd build
@@ -16,4 +14,6 @@ make -j
 
 cd ../..
 
-export PYTHONPATH=$(pwd)/ft_tvm/python
+export PYTHONPATH=$(pwd)/tvm/python
+
+mkdir ./tmp
