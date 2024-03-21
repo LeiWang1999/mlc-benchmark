@@ -4,3 +4,6 @@
 [submodule "vLLM/vllm"]
 	path = vLLM/vllm
 	url = https://github.com/vllm-project/vllm
+[submodule "FasterTransformer/lowprecision_kernels/tvm"]
+	path = FasterTransformer/lowprecision_kernels/tvm
+	url = https://github.com/apache/tvm
