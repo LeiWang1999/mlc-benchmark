@@ -57,8 +57,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     tune_start = time.time()
     cpresults, best = apply_and_build(func, configs, arch, parallel_build=False)
     fast_tune_time = time.time() - tune_start
-    print("[FastDlight] The best latency of top 1 is {:.3f} ms".format(cpresults[0].latency * 1e3))
-    print("[FastDlight] The best latency of top 20 is {:.3f} ms".format(best.latency * 1e3))
+    print("[FastDlight] The best latency of top 1 is {:.3f} ms".format(cpresults[0].latency))
+    print("[FastDlight] The best latency of top 20 is {:.3f} ms".format(best.latency))
 
     # evaluate the performance of the default schedule
     rule = d_schedule()
@@ -88,8 +88,8 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     profile_config = {
         f"{get_prim_func.__name__}-{'-'.join([str(i) for i in input_args])}": {
             "fast_dlight_top20_tune_time": fast_tune_time,
-            "fast_dlight_top1_latency": cpresults[0].latency * 1e3,
-            "fast_dlight_top20_latency": best.latency * 1e3,
+            "fast_dlight_top1_latency": cpresults[0].latency,
+            "fast_dlight_top20_latency": best.latency,
             "default_dlight_tune_time": default_tune_time,
             "default_dlight_latency": t * 1e3,
         }

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from data.gtx3090_gemm import af4_gemm_provider as providers
-from data.gtx3090_gemm import af4_gemm_times_data as times_data
+from data.gtx3090_gemm import nf4_gemm_provider as providers
+from data.gtx3090_gemm import nf4_gemm_times_data as times_data
 
 _1x_baseline = "cuBLAS-W$_{FP16}$A$_{FP16}$"
 _1x_baseline_times = dict(times_data)[_1x_baseline]
@@ -105,8 +105,8 @@ ax.grid(axis="y", linestyle="--", linewidth=0.5)
 ax.grid(False)
 
 # add a title
-plt.title("Speedup of GEMM on GTX3090 (AF4)", fontsize=16)
+plt.title("Speedup of GEMM on GTX3090 (nf4)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_3090_af4_gemm.pdf")
-plt.savefig("png/op_benchmark_3090_af4_gemm.png", dpi=150)
+plt.savefig("pdf/op_benchmark_3090_nf4_gemm.pdf")
+plt.savefig("png/op_benchmark_3090_nf4_gemm.png", dpi=150)

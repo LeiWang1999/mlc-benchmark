@@ -52,6 +52,124 @@ std::vector<std::tuple<int, int, int, bool, bool>> inference_server_set = {
 
 };
 
+// Vector saves m, n, k, a_t, b_t
+std::vector<std::tuple<int, int, int, bool, bool>> scaling_bitwidth = {
+
+    // gemv
+    std::make_tuple(1, 16384, 16384, false, true),
+    std::make_tuple(1, 43008, 14336, false, true),
+    std::make_tuple(1, 14336, 14336, false, true),
+    std::make_tuple(1, 57344, 14336, false, true),
+    std::make_tuple(1, 14336, 57344, false, true),
+    std::make_tuple(1, 9216, 9216, false, true),
+    std::make_tuple(1, 36864, 9216, false, true),
+    std::make_tuple(1, 9216, 36864, false, true),
+    std::make_tuple(1, 22016, 8192, false, true),
+    std::make_tuple(1, 8192, 22016, false, true),
+    std::make_tuple(1, 8192, 8192, false, true),
+    std::make_tuple(1, 28672, 8192, false, true),
+    std::make_tuple(1, 8192, 28672, false, true),
+
+    std::make_tuple(16, 16384, 16384, false, true),
+    std::make_tuple(16, 43008, 14336, false, true),
+    std::make_tuple(16, 14336, 14336, false, true),
+    std::make_tuple(16, 57344, 14336, false, true),
+    std::make_tuple(16, 14336, 57344, false, true),
+    std::make_tuple(16, 9216, 9216, false, true),
+    std::make_tuple(16, 36864, 9216, false, true),
+    std::make_tuple(16, 9216, 36864, false, true),
+    std::make_tuple(16, 22016, 8192, false, true),
+    std::make_tuple(16, 8192, 22016, false, true),
+    std::make_tuple(16, 8192, 8192, false, true),
+    std::make_tuple(16, 28672, 8192, false, true),
+    std::make_tuple(16, 8192, 28672, false, true),
+
+    std::make_tuple(32, 16384, 16384, false, true),
+    std::make_tuple(32, 43008, 14336, false, true),
+    std::make_tuple(32, 14336, 14336, false, true),
+    std::make_tuple(32, 57344, 14336, false, true),
+    std::make_tuple(32, 14336, 57344, false, true),
+    std::make_tuple(32, 9216, 9216, false, true),
+    std::make_tuple(32, 36864, 9216, false, true),
+    std::make_tuple(32, 9216, 36864, false, true),
+    std::make_tuple(32, 22016, 8192, false, true),
+    std::make_tuple(32, 8192, 22016, false, true),
+    std::make_tuple(32, 8192, 8192, false, true),
+    std::make_tuple(32, 28672, 8192, false, true),
+    std::make_tuple(32, 8192, 28672, false, true),
+
+    std::make_tuple(64, 16384, 16384, false, true),
+    std::make_tuple(64, 43008, 14336, false, true),
+    std::make_tuple(64, 14336, 14336, false, true),
+    std::make_tuple(64, 57344, 14336, false, true),
+    std::make_tuple(64, 14336, 57344, false, true),
+    std::make_tuple(64, 9216, 9216, false, true),
+    std::make_tuple(64, 36864, 9216, false, true),
+    std::make_tuple(64, 9216, 36864, false, true),
+    std::make_tuple(64, 22016, 8192, false, true),
+    std::make_tuple(64, 8192, 22016, false, true),
+    std::make_tuple(64, 8192, 8192, false, true),
+    std::make_tuple(64, 28672, 8192, false, true),
+    std::make_tuple(64, 8192, 28672, false, true),
+
+    std::make_tuple(128, 16384, 16384, false, true),
+    std::make_tuple(128, 43008, 14336, false, true),
+    std::make_tuple(128, 14336, 14336, false, true),
+    std::make_tuple(128, 57344, 14336, false, true),
+    std::make_tuple(128, 14336, 57344, false, true),
+    std::make_tuple(128, 9216, 9216, false, true),
+    std::make_tuple(128, 36864, 9216, false, true),
+    std::make_tuple(128, 9216, 36864, false, true),
+    std::make_tuple(128, 22016, 8192, false, true),
+    std::make_tuple(128, 8192, 22016, false, true),
+    std::make_tuple(128, 8192, 8192, false, true),
+    std::make_tuple(128, 28672, 8192, false, true),
+    std::make_tuple(128, 8192, 28672, false, true),
+
+    std::make_tuple(256, 16384, 16384, false, true),
+    std::make_tuple(256, 43008, 14336, false, true),
+    std::make_tuple(256, 14336, 14336, false, true),
+    std::make_tuple(256, 57344, 14336, false, true),
+    std::make_tuple(256, 14336, 57344, false, true),
+    std::make_tuple(256, 9216, 9216, false, true),
+    std::make_tuple(256, 36864, 9216, false, true),
+    std::make_tuple(256, 9216, 36864, false, true),
+    std::make_tuple(256, 22016, 8192, false, true),
+    std::make_tuple(256, 8192, 22016, false, true),
+    std::make_tuple(256, 8192, 8192, false, true),
+    std::make_tuple(256, 28672, 8192, false, true),
+    std::make_tuple(256, 8192, 28672, false, true),
+
+    std::make_tuple(1024, 16384, 16384, false, true),
+    std::make_tuple(1024, 43008, 14336, false, true),
+    std::make_tuple(1024, 14336, 14336, false, true),
+    std::make_tuple(1024, 57344, 14336, false, true),
+    std::make_tuple(1024, 14336, 57344, false, true),
+    std::make_tuple(1024, 9216, 9216, false, true),
+    std::make_tuple(1024, 36864, 9216, false, true),
+    std::make_tuple(1024, 9216, 36864, false, true),
+    std::make_tuple(1024, 22016, 8192, false, true),
+    std::make_tuple(1024, 8192, 22016, false, true),
+    std::make_tuple(1024, 8192, 8192, false, true),
+    std::make_tuple(1024, 28672, 8192, false, true),
+    std::make_tuple(1024, 8192, 28672, false, true),
+
+    std::make_tuple(4096, 16384, 16384, false, true),
+    std::make_tuple(4096, 43008, 14336, false, true),
+    std::make_tuple(4096, 14336, 14336, false, true),
+    std::make_tuple(4096, 57344, 14336, false, true),
+    std::make_tuple(4096, 14336, 57344, false, true),
+    std::make_tuple(4096, 9216, 9216, false, true),
+    std::make_tuple(4096, 36864, 9216, false, true),
+    std::make_tuple(4096, 9216, 36864, false, true),
+    std::make_tuple(4096, 22016, 8192, false, true),
+    std::make_tuple(4096, 8192, 22016, false, true),
+    std::make_tuple(4096, 8192, 8192, false, true),
+    std::make_tuple(4096, 28672, 8192, false, true),
+    std::make_tuple(4096, 8192, 28672, false, true),
+
+};
+
 /*
 Usage:
 
@@ -222,7 +340,7 @@ int main(int argc, char **argv)
 
         int pad_kernels_count = 0;
 
-        for (const auto &problem : inference_server_set)
+        for (const auto &problem : scaling_bitwidth)
         {
             int m, n, k;
             bool a_t, b_t;

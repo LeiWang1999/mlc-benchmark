@@ -161,7 +161,7 @@ def matmul_nt_i4_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16")
     return tvm.IRModule.from_expr(func)
 
 
-def matmul_nt_af4(M, N, K, in_dtype="float16", out_dtype="float16"):
+def matmul_nt_nf4(M, N, K, in_dtype="float16", out_dtype="float16"):
     bit = 4
     n_float_per_i8 = 8 // bit
 
@@ -204,7 +204,7 @@ def matmul_nt_af4(M, N, K, in_dtype="float16", out_dtype="float16"):
     })
     return tvm.IRModule.from_expr(func)
 
-def matmul_nt_af4_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16"):
+def matmul_nt_nf4_propagate_a_b(M, N, K, in_dtype="float16", out_dtype="float16"):
     bit = 4
     n_float_per_i8 = 8 // bit
 
@@ -316,8 +316,8 @@ benchmark_sets = [
     # (matmul_nt_i4_propagate_a_b, (64, 14336, 57344, "float16", "float16"), Matmul),
     # (matmul_nt_i4_propagate_b, (32, 16384, 16384, "float16", "float16"), Matmul),
     # (matmul_nt_i4_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
-    # (matmul_nt_af4, (16384, 16384, 16384, "float16", "float16"), Matmul),
-    # (matmul_nt_af4_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    # (matmul_nt_nf4, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    # (matmul_nt_nf4_propagate_a_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
 ]
 benchmark_results = {}
 for get_prim_func, input_args, d_schedule in benchmark_sets:
@@ -341,16 +341,16 @@ for get_prim_func, input_args, d_schedule in benchmark_sets:
     fast_tune_time = time.time() - tune_start
     print(
         "[FastDlight] The best latency of top 1 is {:.3f} ms".format(
-            cpresults[0].latency * 1e3
+            cpresults[0].latency
         )
     )
     print(
         "[FastDlight] The best latency of top 20 is {:.3f} ms".format(
-            best.latency * 1e3
+            best.latency
         )
     )
 
-    benchmark_results[f"{get_prim_func.__name__}-{'-'.join([str(i) for i in input_args])}"] = best.latency * 1e3
+    benchmark_results[f"{get_prim_func.__name__}-{'-'.join([str(i) for i in input_args])}"] = best.latency
     
 for k, v in benchmark_results.items():
     print(f"{k}: {v} ms")

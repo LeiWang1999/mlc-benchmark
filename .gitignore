@@ -63,3 +63,6 @@ doc/doxygen/html/*
 
 # progress
 progress
+
+# .hypothesis
+.hypothesis
