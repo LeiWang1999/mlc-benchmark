@@ -110,4 +110,4 @@ plt.title("Speedup of GEMM on A100 (Weight Quantize)", fontsize=16)
 
 # Save the plot to a file
 plt.savefig("pdf/op_benchmark_a100_wq_gemm.pdf")
-plt.savefig("png/op_benchmark_a100_wq_gemm.png", dpi=150)
+plt.savefig("png/op_benchmark_a100_wq_gemm.png", bbox_inches='tight', dpi=150)
