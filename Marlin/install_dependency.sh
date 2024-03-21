@@ -1,1 +1,4 @@
-git clone https://github.com/IST-DASLab/marlin
+git submodule update --init --recursive .
+cd marlin
+pip install .
+cd ..

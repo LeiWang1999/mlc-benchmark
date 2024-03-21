@@ -1,0 +1,3 @@
+[submodule "Marlin/marlin"]
+	path = Marlin/marlin
+	url = https://github.com/IST-DASLab/marlin
