@@ -26,26 +26,13 @@ parser.add_argument(
     default=get_target_from_env(),
 )
 parser.add_argument(
-    "--batch_seq",
-    type=int,
-    default=1,
-    help="The batch size of the sequence",
-)
-parser.add_argument(
-    "group_size",
-    type=int,
-    default=-1,
-    help="The group size of the sequence",
-)
-parser.add_argument(
     "--benchmark_sets",
     nargs="+",
-    default=["llm_shapes"],
+    default=["llm_shape_int8xint8"],
     help="List of benchmark sets, e.g., llm_int8xint1_bs4096",
 )
 
 args = parser.parse_args()
-group_size = args.group_size
 
 
 # fmt:off

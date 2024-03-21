@@ -106,15 +106,14 @@ def get_and_print(log_path, log_case, A_layout="col", B_layout="row"):
     elif log_case == "min_s8_tensorcore_runtime":
         print(min_s8_tensorcore_runtime)
 
-
+import argparse
+parser = argparse.ArgumentParser(description='parse cutlass log')
+parser.add_argument('--log_path', type=str, default="./csv_logs")
+parser.add_argument('--log_case', type=str, default="min_fp16_tensorcore_runtime", help="min_fp32_cudacore_runtime, min_fp32_tensorcore_runtime, min_fp16_cudacore_runtime, min_fp16_tensorcore_runtime, min_s8_cudacore_runtime, min_s8_tensorcore_runtime")
+args = parser.parse_args()
 if __name__ == "__main__":
-    # log_case = 'min_fp32_cudacore_runtime'
-    # log_case = 'min_fp32_tensorcore_runtime'
-    # log_case = 'min_fp16_cudacore_runtime'
-    # log_case = 'min_fp16_tensorcore_runtime'
-    # log_case = 'min_s8_cudacore_runtime'
-    log_case = "min_s8_tensorcore_runtime"
-    log_dir = "./csv_logs"
+    log_dir = args.log_path
+    log_case = args.log_case
     print("llm_sizes")
     for m, n, k in llm_sizes:
         log_name = "cutlass_shape_{0}_{1}_{2}_performance.gemm.csv".format(m, k, n)

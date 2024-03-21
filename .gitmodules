@@ -1,0 +1,15 @@
+[submodule "Marlin/marlin"]
+	path = Marlin/marlin
+	url = https://github.com/IST-DASLab/marlin
+[submodule "vLLM/vllm"]
+	path = vLLM/vllm
+	url = https://github.com/vllm-project/vllm
+[submodule "FasterTransformer/lowprecision_kernels/tvm"]
+	path = FasterTransformer/lowprecision_kernels/tvm
+	url = https://github.com/apache/tvm
+[submodule "TenorrtLLM/lowprecision_kernels/tvm"]
+	path = TenorrtLLM/lowprecision_kernels/tvm
+	url = https://github.com/apache/tvm
+[submodule "CUTLASS/cutlass"]
+	path = CUTLASS/cutlass
+	url = https://github.com/NVIDIA/cutlass

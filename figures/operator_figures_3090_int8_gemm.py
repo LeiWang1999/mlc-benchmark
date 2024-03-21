@@ -2,7 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data.gtx3090_gemm import s8_gemm_provider as providers
 from data.gtx3090_gemm import s8_gemm_times_data as times_data
-
+num_ops = 4
+providers = providers[:num_ops]
+for i in range(len(times_data)):
+    times_data[i] = (times_data[i][0], times_data[i][1][:num_ops])
 _1x_baseline = "cuBLAS"
 _1x_baseline_times = dict(times_data)[_1x_baseline]
 
@@ -52,10 +55,10 @@ hatch_patterns = [
 x = np.arange(len(providers))
 
 # Set the width of the bars
-bar_width = 0.25
+bar_width = 0.2
 
 # Plotting
-fig, ax = plt.subplots(figsize=(12, 4))
+fig, ax = plt.subplots(figsize=(9, 5))
 x = np.arange(len(providers))
 
 # Draw cublas as a horizontal dashed line

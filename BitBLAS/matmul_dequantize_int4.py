@@ -25,12 +25,6 @@ parser.add_argument(
     default=get_target_from_env(),
 )
 parser.add_argument(
-    "--batch_seq",
-    type=int,
-    default=1,
-    help="The batch size of the sequence",
-)
-parser.add_argument(
     "--group_size",
     type=int,
     default=-1,
