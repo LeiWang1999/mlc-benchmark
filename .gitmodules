@@ -7,3 +7,6 @@
 [submodule "FasterTransformer/lowprecision_kernels/tvm"]
 	path = FasterTransformer/lowprecision_kernels/tvm
 	url = https://github.com/apache/tvm
+[submodule "TenorrtLLM/lowprecision_kernels/tvm"]
+	path = TenorrtLLM/lowprecision_kernels/tvm
+	url = https://github.com/apache/tvm
