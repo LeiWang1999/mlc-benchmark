@@ -1,3 +1,6 @@
 [submodule "Marlin/marlin"]
 	path = Marlin/marlin
 	url = https://github.com/IST-DASLab/marlin
+[submodule "vLLM/vllm"]
+	path = vLLM/vllm
+	url = https://github.com/vllm-project/vllm
