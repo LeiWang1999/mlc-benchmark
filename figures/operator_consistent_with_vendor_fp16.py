@@ -99,8 +99,8 @@ ax.legend(
     frameon=False,
 )
 # X-axis and labels
-ax.set_xlabel("Shapes from LLM", fontsize=16)
-ax.set_ylabel("Speedup vs cuBLAS", fontsize=18)
+ax.set_xlabel("Shapes from LLM", fontsize=18)
+ax.set_ylabel("Speedup vs cuBLAS", fontsize=20)
 ax.set_xticks(x + len(speed_up_data) * bar_width / len(times_data))
 ax.set_xticklabels(providers)
 ax.grid(axis="y", linestyle="--", linewidth=0.5)
@@ -109,8 +109,8 @@ ax.grid(axis="y", linestyle="--", linewidth=0.5)
 ax.grid(False)
 
 # add a title
-plt.title("Speedup of GEMM on A100 and GTX 4090 (FP16)", fontsize=16)
+plt.title("Speedup of GEMM on A100 and GTX 4090 (FP16)", fontsize=18)
 
 # Save the plot to a file
 plt.savefig("pdf/op_benchmark_consistent_gemm_fp16.pdf")
-plt.savefig("png/op_benchmark_consistent_gemm_fp16.png",  bbox_inches='tight', bbox_inches='tight', transparent=False, dpi=150)
+plt.savefig("png/op_benchmark_consistent_gemm_fp16.png", bbox_inches='tight', transparent=False, dpi=150)
