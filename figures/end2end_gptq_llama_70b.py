@@ -101,17 +101,17 @@ ax.legend(
     frameon=False,
 )
 # X-axis and labels
-ax.set_xlabel("Configs", fontsize=18)
-ax.set_ylabel("Normalize Speedup vs GPTQ-CUDA", fontsize=20)
+ax.set_xlabel("BATCHSIZE-SEQLEN", fontsize=18)
+ax.set_ylabel("Speedup vs GPTQ-CUDA", fontsize=20)
 ax.set_xticks(x + len(speed_up_data) * bar_width / len(times_data))
-ax.set_xticklabels(providers)
+ax.set_xticklabels(providers, fontsize=14)
 ax.grid(axis="y", linestyle="--", linewidth=0.5)
 
 # disable grid
 ax.grid(False)
 
 # add a title
-plt.title("LLAMA-70B-INT4 Inference Speedup on A100 (FP16)", fontsize=18)
+plt.title("LLAMA-70B-INT4 Inference Speedup on A100", fontsize=18)
 
 # Save the plot to a file
 plt.savefig("pdf/end2end_llama_70b_auto_gptq.pdf")

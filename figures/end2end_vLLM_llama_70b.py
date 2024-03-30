@@ -4,8 +4,8 @@ import numpy as np
 gemm_provider = ["BS8IN32OUT128", "BS1IN512OUT64", "BS32IN32OUT128"]
 
 gemm_times_data = [
-    ('vLLM-GPTQ-INT4', (3.52347609, 0.663261924, 6.442715546)),
-    ('vLLM-GPTQ-BitBLAS', (0.744701838, 0.310466145, 1.137882472, )),
+    ('vLLM-GPTQ-INT4', (9.029104872, 2.384436632, 31.64161604)),
+    ('vLLM-GPTQ-BitBLAS', (1.088938882, 0.832760441, 2.244761029, )),
 ]
 
 providers = gemm_provider
@@ -100,7 +100,6 @@ ax.legend(
 )
 # X-axis and labels
 ax.set_xlabel("BATCHSIZE-INSEQLEN-OUTSEQLEN", fontsize=18)
-ax.set_ylabel("Speedup vs vLLM-GPTQ", fontsize=20)
 ax.set_xticks(x + len(speed_up_data) * bar_width / len(times_data))
 ax.set_xticklabels(providers, fontsize=14)
 ax.grid(axis="y", linestyle="--", linewidth=0.5)
@@ -109,8 +108,8 @@ ax.grid(axis="y", linestyle="--", linewidth=0.5)
 ax.grid(False)
 
 # add a title
-plt.title("LLAMA-13B-INT4 Inference Speedup on A100", fontsize=18)
+plt.title("LLAMA-70B-INT4 Inference Speedup on A100", fontsize=18)
 
 # Save the plot to a file
-plt.savefig("pdf/end2end_llama_13b_vllm.pdf")
-plt.savefig("png/end2end_llama_13b_vllm.png", bbox_inches='tight', transparent=False, dpi=180)
+plt.savefig("pdf/end2end_llama_70B_vllm.pdf")
+plt.savefig("png/end2end_llama_70B_vllm.png", bbox_inches='tight', transparent=False, dpi=180)
