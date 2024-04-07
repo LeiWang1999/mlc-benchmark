@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-gemm_provider = ["BS8IN32OUT128", "BS1IN512OUT64", "BS32IN32OUT128"]
+gemm_provider = ["BS16IN32OUT128", "BS1IN512OUT64", "BS32IN32OUT128"]
 
 gemm_times_data = [
-    ('vLLM-GPTQ-INT4', (9.029104872, 2.384436632, 31.64161604)),
-    ('vLLM-GPTQ-BitBLAS', (1.088938882, 0.832760441, 2.244761029, )),
-]
+    ('vLLM-GPTQ-INT4', (16.5553295, 2.469421364	, 31.57192899)),
+    ('vLLM-GPTQ-BitBLAS', (8.289523188, 2.577486064, 10.65050894, )),
+]	
 
 providers = gemm_provider
 times_data = gemm_times_data

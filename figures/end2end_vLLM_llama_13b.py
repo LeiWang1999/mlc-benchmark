@@ -4,8 +4,8 @@ import numpy as np
 gemm_provider = ["BS8IN32OUT128", "BS1IN512OUT64", "BS32IN32OUT128"]
 
 gemm_times_data = [
-    ('vLLM-GPTQ-INT4', (3.52347609, 0.663261924, 6.442715546)),
-    ('vLLM-GPTQ-BitBLAS', (0.744701838, 0.310466145, 1.137882472, )),
+    ('vLLM-GPTQ-INT4', (3.585646541, 0.886843146, 6.462446744, )),
+    ('vLLM-GPTQ-BitBLAS', (2.71560482, 0.879050933, 2.237323331, )),
 ]
 
 providers = gemm_provider

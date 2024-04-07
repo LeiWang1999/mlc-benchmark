@@ -8,7 +8,7 @@ from bitblas.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from bitblas.base.roller.arch import CUDA
 from bitblas.gpu.matmul_analysis import get_tensorized_func_and_tags
 from bitblas.gpu import Matmul
-from bitblas.utils import get_target_from_env
+from bitblas.utils import auto_detect_nvidia_target
 from bitblas.base.utils import apply_and_build
 from bitblas.ops.impl.matmul_dequantize_impl import (
     matmul_nt_dequantize_b,
@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--target",
     type=str,
-    default=get_target_from_env(),
+    default=auto_detect_nvidia_target(),
 )
 parser.add_argument(
     "--batch_seq",
@@ -93,7 +93,7 @@ for benchmark_set in args.benchmark_sets:
 benchmark_results = {}
 # fmt:on
 
-target = tvm.target.Target(get_target_from_env())
+target = tvm.target.Target(auto_detect_nvidia_target())
 
 benchmark_results = {}
 for get_prim_func, input_args, d_schedule in benchmark_sets:

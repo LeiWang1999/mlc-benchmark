@@ -7,7 +7,7 @@ from bitblas.base.roller.policy import TensorCorePolicy, DefaultPolicy
 from bitblas.base.roller.arch import CUDA
 from bitblas.gpu.matmul_analysis import get_tensorized_func_and_tags
 from bitblas.gpu import Matmul
-from bitblas.utils import get_target_from_env
+from bitblas.utils import auto_detect_nvidia_target
 from bitblas.base.utils import apply_and_build
 from bitblas.ops.impl.matmul_impl import (
     matmul_nt,
@@ -23,12 +23,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--target",
     type=str,
-    default=get_target_from_env(),
+    default=auto_detect_nvidia_target(),
 )
 parser.add_argument(
     "--benchmark_sets",
     nargs="+",
-    default=["llm_shape_int8xint8"],
+    default=["llm_shape_fp16xfp16"],
     help="List of benchmark sets, e.g., llm_int8xint1_bs4096",
 )
 
@@ -38,41 +38,55 @@ args = parser.parse_args()
 # fmt:off
 
 llm_shape_fp16xfp16 = [
-    # square test
-    (matmul_nt, (1, 16384, 16384, "float16", "float16"), Matmul),
-    # BLOOM-176B
-    (matmul_nt, (1, 43008, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 14336, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 57344, 14336, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 14336, 57344, "float16", "float16"), Matmul),
-    # # OPT-65B
-    (matmul_nt, (1, 9216, 9216, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 36864, 9216, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 9216, 36864, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 22016, 8192, "float16", "float16"), Matmul),
-    # # LLAMA-70B/65B
-    (matmul_nt, (1, 8192, 22016, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 8192, 8192, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 28672, 8192, "float16", "float16"), Matmul),
-    (matmul_nt, (1, 8192, 28672, "float16", "float16"), Matmul),
+    # # square test
+    # (matmul_nt, (1, 16384, 16384, "float16", "float16"), Matmul),
+    # # BLOOM-176B
+    # (matmul_nt, (1, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 14336, 57344, "float16", "float16"), Matmul),
+    # # # OPT-65B
+    # (matmul_nt, (1, 9216, 9216, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 36864, 9216, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 9216, 36864, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 22016, 8192, "float16", "float16"), Matmul),
+    # # # LLAMA-70B/65B
+    # (matmul_nt, (1, 8192, 22016, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 8192, 8192, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 28672, 8192, "float16", "float16"), Matmul),
+    # (matmul_nt, (1, 8192, 28672, "float16", "float16"), Matmul),
     
-    # square test
+    # # square test
+    # (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    # # BLOOM-176B
+    # (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "float16", "float16"), Matmul),
+    # # # OPT-65B
+    # (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "float16", "float16"), Matmul),
+    # # # LLAMA-70B/65B
+    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "float16", "float16"), Matmul),
+    # (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "float16", "float16"), Matmul),
+    
+    (matmul_nt, (16384, 16384, 16384, "float16", "float16"), Matmul),
+    (matmul_nt, (4096, 8192, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (4096, 28672, 8192, "float16", "float16"), Matmul),
+    (matmul_nt, (4096, 8192, 28672, "float16", "float16"), Matmul),
+    (matmul_nt, (4096, 4096, 11008, "float16", "float16"), Matmul),
+    (matmul_nt, (4096, 11008, 4096, "float16", "float16"), Matmul),
+    
     (matmul_nt_propagate_a_propagate_b, (16384, 16384, 16384, "float16", "float16"), Matmul),
-    # BLOOM-176B
-    (matmul_nt_propagate_a_propagate_b, (8192, 43008, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 57344, 14336, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 14336, 57344, "float16", "float16"), Matmul),
-    # # OPT-65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 9216, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 36864, 9216, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 9216, 36864, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 22016, 8192, "float16", "float16"), Matmul),
-    # # LLAMA-70B/65B
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 22016, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 8192, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 28672, 8192, "float16", "float16"), Matmul),
-    (matmul_nt_propagate_a_propagate_b, (8192, 8192, 28672, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (4096, 8192, 8192, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (4096, 28672, 8192, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (4096, 8192, 28672, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (4096, 4096, 11008, "float16", "float16"), Matmul),
+    (matmul_nt_propagate_a_propagate_b, (4096, 11008, 4096, "float16", "float16"), Matmul),
 ]
 
 llm_shape_int8xint8 = [
@@ -103,7 +117,7 @@ for benchmark_set in args.benchmark_sets:
     benchmark_sets.extend(eval(benchmark_set))
 benchmark_results = {}
 
-target = tvm.target.Target(get_target_from_env())
+target = tvm.target.Target(auto_detect_nvidia_target())
 
 benchmark_results = {}
 for get_prim_func, input_args, d_schedule in benchmark_sets:
