@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+colormap = plt.cm.summer# LinearSegmentedColormap
 gemm_provider = ["M0","M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"]
 
 gemm_times_data = [
@@ -69,6 +69,7 @@ def get_inverse(a):
 
 # Create bars using a loop
 for i, (label, speedup) in enumerate(speed_up_data):
+    color = colormap(i / len(speed_up_data))
     rec = ax.bar(
         x + i * bar_width,
         speedup,
@@ -113,4 +114,4 @@ plt.title("Speedup of GEMM on A100 and RTX 4090 (FP16)", fontsize=18)
 
 # Save the plot to a file
 plt.savefig("pdf/op_benchmark_consistent_gemm_fp16.pdf")
-plt.savefig("png/op_benchmark_consistent_gemm_fp16.png", bbox_inches='tight', transparent=False, dpi=150)
+plt.savefig("png/op_benchmark_consistent_gemm_fp16.png", bbox_inches='tight', transparent=False, dpi=255)

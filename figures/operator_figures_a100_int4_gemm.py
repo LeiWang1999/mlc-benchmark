@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data.a100_gemm import s4_gemm_provider as providers
 from data.a100_gemm import s4_gemm_times_data as times_data
+colormap = plt.cm.summer# LinearSegmentedColormap
 
 _1x_baseline = "cuBLAS-W$_{FP16}$A$_{FP16}$"
 _1x_baseline_times = dict(times_data)[_1x_baseline]
@@ -66,6 +67,7 @@ def get_inverse(a):
 
 # Create bars using a loop
 for i, (label, speedup) in enumerate(speed_up_data):
+    color = colormap(i / len(speed_up_data))
     rec = ax.bar(
         x + i * bar_width,
         speedup,
@@ -74,7 +76,8 @@ for i, (label, speedup) in enumerate(speed_up_data):
         linewidth=0.8,
         edgecolor="black",
         hatch=hatch_patterns[i % 8],
-        color=colers_sets[i],
+        # color=colers_sets[i],
+        color=color,
     )
 
 # set y-limit
