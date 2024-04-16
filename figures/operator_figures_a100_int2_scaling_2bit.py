@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from data.a100_gemm import s1_gemm_provider as providers
-from data.a100_gemm import s1_gemm_speedup_data as speed_up_data
+from data.a100_gemm import s2_gemm_provider as providers
+from data.a100_gemm import s2_gemm_speedup_data as speed_up_data
+
 colormap = plt.cm.tab20b  # LinearSegmentedColormap
 
 # Data
@@ -79,11 +80,11 @@ ax.grid(False)
 
 # add a title
 plt.title(
-    "Scaling Speedup of BitNET INT8xUINT1 on A100",
+    "Scaling Speedup of BitNET INT8xINT2 on A100",
     fontsize=16,
 )
 plt.style.use("ggplot")
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_a100_uint1_scaling.pdf")
-plt.savefig("png/op_benchmark_a100_uint1_scaling.png", bbox_inches='tight', dpi=255)
+plt.savefig("pdf/op_benchmark_a100_int2_scaling.pdf")
+plt.savefig("png/op_benchmark_a100_int2_scaling.png", bbox_inches="tight", dpi=255)
