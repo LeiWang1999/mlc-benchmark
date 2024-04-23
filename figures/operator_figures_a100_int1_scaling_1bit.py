@@ -79,11 +79,11 @@ ax.grid(False)
 
 # add a title
 plt.title(
-    "Scaling Speedup of BitNET INT8xUINT1 on A100",
+    "Scaling Speedup of INT8xUINT1 on A100",
     fontsize=16,
 )
 plt.style.use("ggplot")
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_a100_uint1_scaling.pdf")
+plt.savefig("pdf/op_benchmark_a100_uint1_scaling.pdf", bbox_inches='tight')
 plt.savefig("png/op_benchmark_a100_uint1_scaling.png", bbox_inches='tight', dpi=255)

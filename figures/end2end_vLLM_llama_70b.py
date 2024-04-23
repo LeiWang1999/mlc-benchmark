@@ -111,5 +111,5 @@ ax.grid(False)
 plt.title("LLAMA-70B-INT4 Inference Speedup on A100", fontsize=18)
 
 # Save the plot to a file
-plt.savefig("pdf/end2end_llama_70B_vllm.pdf")
+plt.savefig("pdf/end2end_llama_70B_vllm.pdf", bbox_inches='tight')
 plt.savefig("png/end2end_llama_70B_vllm.png", bbox_inches='tight', transparent=False, dpi=180)

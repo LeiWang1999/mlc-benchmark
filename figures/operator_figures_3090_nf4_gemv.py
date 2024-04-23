@@ -107,5 +107,5 @@ ax.grid(False)
 plt.title("Speedup of GEMV on GTX3090 (nf4)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_3090_nf4_gemv.pdf")
-plt.savefig("png/op_benchmark_3090_nf4_gemv.png", bbox_inches='tight', dpi=150)
+plt.savefig("pdf/op_benchmark_3090_nf4_gemv.pdf", bbox_inches='tight')
+plt.savefig("png/op_benchmark_3090_nf4_gemv.png", bbox_inches='tight', dpi=255)

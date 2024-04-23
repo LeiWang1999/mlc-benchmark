@@ -113,5 +113,5 @@ ax.grid(False)
 plt.title("Speedup of GEMM on A100 and RTX 4090 (FP16)", fontsize=18)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_consistent_gemm_fp16.pdf")
+plt.savefig("pdf/op_benchmark_consistent_gemm_fp16.pdf", bbox_inches='tight')
 plt.savefig("png/op_benchmark_consistent_gemm_fp16.png", bbox_inches='tight', transparent=False, dpi=255)

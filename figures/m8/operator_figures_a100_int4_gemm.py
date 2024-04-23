@@ -8,6 +8,7 @@ for i in range(len(times_data)):
     times_data[i] = (times_data[i][0], times_data[i][1][:num_ops])
 _1x_baseline = "cuBLAS-W$_{FP16}$A$_{FP16}$"
 _1x_baseline_times = dict(times_data)[_1x_baseline]
+colormap = plt.cm.Set3 # LinearSegmentedColormap
 
 # 计算其他方法相对加速比
 speed_up_data = []
@@ -69,6 +70,7 @@ def get_inverse(a):
 
 # Create bars using a loop
 for i, (label, speedup) in enumerate(speed_up_data):
+    color = colormap(i / len(speed_up_data))
     rec = ax.bar(
         x + i * bar_width,
         speedup,
@@ -77,7 +79,8 @@ for i, (label, speedup) in enumerate(speed_up_data):
         linewidth=0.8,
         edgecolor="black",
         hatch=hatch_patterns[i % 8],
-        color=colers_sets[i],
+        # color=colers_sets[i],
+        color=color,
     )
 
 # set y-limit
@@ -112,5 +115,5 @@ ax.grid(False)
 plt.title("Speedup of GEMM on A100 (Weight Quantize)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig(f"pdf/op_benchmark_a100_wq_gemm_e{num_ops}.pdf")
-plt.savefig(f"png/op_benchmark_a100_wq_gemm_e{num_ops}.png", bbox_inches='tight', dpi=150)
+plt.savefig(f"pdf/op_benchmark_a100_wq_gemm_e{num_ops}.pdf", bbox_inches='tight')
+plt.savefig(f"png/op_benchmark_a100_wq_gemm_e{num_ops}.png", bbox_inches='tight', dpi=255)

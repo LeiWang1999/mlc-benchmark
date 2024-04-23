@@ -86,5 +86,5 @@ plt.title(
 plt.style.use("ggplot")
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_a100_int2_scaling.pdf")
+plt.savefig("pdf/op_benchmark_a100_int2_scaling.pdf", bbox_inches='tight')
 plt.savefig("png/op_benchmark_a100_int2_scaling.png", bbox_inches="tight", dpi=255)

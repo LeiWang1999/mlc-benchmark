@@ -114,5 +114,5 @@ ax.grid(False)
 plt.title("Speedup of GEMM on GTX3090 (INT8)", fontsize=16)
 
 # Save the plot to a file
-plt.savefig("pdf/op_benchmark_3090_s8_gemm.pdf")
-plt.savefig("png/op_benchmark_3090_s8_gemm.png", dpi=150)
+plt.savefig("pdf/op_benchmark_3090_s8_gemm.pdf", bbox_inches='tight')
+plt.savefig("png/op_benchmark_3090_s8_gemm.png", dpi=255)

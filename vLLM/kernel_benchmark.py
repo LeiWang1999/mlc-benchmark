@@ -59,3 +59,4 @@ for M, N, K in shapes:
             get_runtime()  # warmup
         times = [get_runtime() for i in range(100)]
         print(f"vllm llama run {M} {N} {K} avg: {np.mean(times)} ms")
+        torch.cuda.synchronize()

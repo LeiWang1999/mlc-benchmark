@@ -49,8 +49,45 @@ batch_seq = args.batch_seq
 group_size = args.group_size
 
 # fmt:off
-
 llm_int8xint2 = [
+    # square test
+    (matmul_nt_dequantize_b, (1, 16384, 16384, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # BLOOM-176B
+    (matmul_nt_dequantize_b, (1, 43008, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 14336, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 57344, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 14336, 57344, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # # OPT-65B
+    (matmul_nt_dequantize_b, (1, 9216, 9216, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 36864, 9216, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 9216, 36864, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 22016, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # LLAMA-70B/65B
+    (matmul_nt_dequantize_b, (1, 8192, 22016, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 8192, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 28672, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b, (1, 8192, 28672, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    
+        # square test
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (16384, 16384, 16384, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # BLOOM-176B
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 43008, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 14336, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 57344, 14336, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 14336, 57344, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # OPT-65B
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 9216, 9216, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 36864, 9216, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 9216, 36864, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 22016, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    # LLAMA-70B/65B
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 8192, 22016, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 8192, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 28672, 8192, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+    (matmul_nt_dequantize_b_propagate_a_propagate_b, (8192, 8192, 28672, "int8", "int8", "int32", 2, "int8", "uint", False, False, group_size, True, False), Matmul),
+]
+
+llm_int8xint2_scaling = [
     # square test
     (matmul_nt_dequantize_b, (1, 16384, 16384, "int8", "int8", "int32", 2, "int8", "int", False, False, group_size, True, False), Matmul),
     # BLOOM-176B
